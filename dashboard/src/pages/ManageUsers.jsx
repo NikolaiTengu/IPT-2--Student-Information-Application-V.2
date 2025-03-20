@@ -10,6 +10,8 @@ const ManageUsers = () => {
   const [editingId, setEditingId] = useState(null);
   const [userToDelete, setUserToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // NEW: Toggle password visibility
+
   const [formData, setFormData] = useState({
     userID: '',
     firstName: '',
@@ -148,7 +150,7 @@ const ManageUsers = () => {
                   <td>{user.lastName}</td>
                   <td>{user.middleName}</td>
                   <td>{user.username}</td>
-                  <td>{user.password}</td>
+                  <td>{user.password}</td> {/* Password is always visible */}
                   <td>{user.userType}</td>
                   <td className="action-buttons">
                     <a href="#" className="edit-link" onClick={(e) => { e.preventDefault(); handleEdit(user); }}>Edit</a>
@@ -180,13 +182,27 @@ const ManageUsers = () => {
                 <input type="text" name="lastName" value={formData.lastName} onChange={handleInputChange} placeholder="Last Name" className="input-field" required />
                 <input type="text" name="middleName" value={formData.middleName} onChange={handleInputChange} placeholder="Middle Name" className="input-field" />
                 <input type="text" name="username" value={formData.username} onChange={handleInputChange} placeholder="Username" className="input-field" required />
-                <input type="password" name="password" value={formData.password} onChange={handleInputChange} placeholder="Password" className="input-field" required />
+
+                {/* Password Input with Toggle Visibility */}
+                <div className="password-container">
+                  <input 
+                    type={showPassword ? "text" : "text"} 
+                    name="password" 
+                    value={formData.password} 
+                    onChange={handleInputChange} 
+                    placeholder="Password" 
+                    className="input-field" 
+                    required 
+                  />
+                </div>
+
                 <select name="userType" value={formData.userType} onChange={handleInputChange} className="input-field" required>
                   <option value="" disabled>Select User Type</option>
                   <option value="Admin">Admin</option>
                   <option value="Moderator">Moderator</option>
                   <option value="User">User</option>
                 </select>
+
                 <div className="button-group">
                   <button type="submit" className="submit-button">{isEditing ? 'UPDATE USER' : 'ADD USER'}</button>
                   <button type="button" className="cancel-button" onClick={closeModal}>CANCEL</button>
