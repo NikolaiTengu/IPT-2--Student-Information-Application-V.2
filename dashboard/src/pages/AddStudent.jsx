@@ -161,7 +161,7 @@ const AddStudent = () => {
 
   return (
     <div className="student-container">
-      <h1 className="student-title">STUDENT MANAGEMENT</h1>
+      <h1 className="student-title">MANAGE STUDENTS!</h1>
       
       <div className="table-container">
         <div className="table-header">
