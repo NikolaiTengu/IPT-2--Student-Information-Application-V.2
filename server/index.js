@@ -57,26 +57,3 @@ const port = 1337;
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
-
-// app.get('/calculate/:num1/:num2', (req, res) => {
-//     const num1 = parseInt(req.params.num1);
-//     const num2 = parseInt(req.params.num2);
-//     const sum = num1 + num2;
-//     res.send(`The sum of ${num1} and ${num2} is ${sum}`);
-//     });
-
-//     app.get('/search', (req, res) => {
-//     const query = req.query.q;
-//     if (!query) {
-//     return res.send('Please provide a search query using ?q=your_query');
-//     }
-//     res.send(`You searched for: ${query}`);
-//  });
-
-// app.get('/search', (req, res) => {
-//         const query = req.query.q;
-//         if (!query) {
-//         return res.send('Please provide a search query using ?q=your_query');
-//         }
-//         res.send(`You searched for: ${query}`);
-// });
