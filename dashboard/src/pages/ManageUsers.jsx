@@ -196,24 +196,6 @@ const ManageUsers = () => {
           </div>
         </div>
       )}
-
-      {showDeleteModal && userToDelete && (
-        <div className="modal-overlay">
-          <div className="modal-content delete-modal">
-            <div className="modal-header">
-              <h2>CONFIRM DELETE</h2>
-              <button className="close-button" onClick={closeDeleteModal} disabled={isDeleting}>×</button>
-            </div>
-            <div className="modal-body">
-              <p>Are you sure you want to delete user {userToDelete.firstName} {userToDelete.lastName}?</p>
-              <div className="button-group">
-                <button type="button" className="delete-confirm-button" onClick={confirmDelete} disabled={isDeleting}>{isDeleting ? 'DELETING...' : 'DELETE'}</button>
-                <button type="button" className="cancel-button" onClick={closeDeleteModal} disabled={isDeleting}>CANCEL</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
