@@ -52,8 +52,6 @@ app.delete('/deletestudent/:id', (req, res) => {
     console.log(`Deleted student with id: ${id}`);
 });
 
-const port = 1337;
-
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
