@@ -20,6 +20,12 @@ const Sidebar = () => {
             <span>STUDENT</span>
           </Link>
         </li>
+        <li className="sidebar-item">
+          <Link to="/manageusers" className="sidebar-link">
+            <PersonAddIcon className="sidebar-icon" />
+            <span>MANAGE USERS</span>
+          </Link>
+        </li>
       </ul>
     </div>
   );

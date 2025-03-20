@@ -1,0 +1,297 @@
+.user-container {
+    padding: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .user-title {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 30px;
+    color: #3a506b;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 3px solid #3a506b;
+    padding-bottom: 15px;
+  }
+  
+  .table-container {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+  }
+  
+  .table-header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 20px;
+    background-color: #f7f9fb;
+    border-bottom: 1px solid #e1e5eb;
+  }
+  
+  .add-button {
+    background-color: #3a506b;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    font-size: 14px;
+  }
+  
+  .add-button:hover {
+    background-color: #2d3f57;
+  }
+  
+  .user-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .user-table th {
+    background-color: #e9ecef;
+    color: #3a506b;
+    font-weight: 600;
+    text-align: left;
+    padding: 16px;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #dee2e6;
+  }
+  
+  .user-table td {
+    padding: 16px;
+    border-bottom: 1px solid #e9ecef;
+    color: #495057;
+    vertical-align: middle;
+  }
+  
+  .user-table tr:hover {
+    background-color: #f5f7fa;
+  }
+  
+  .action-buttons {
+    white-space: nowrap;
+    display: flex;
+    gap: 12px;
+  }
+  
+  .edit-link {
+    color: #3a506b;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  
+  .edit-link:hover {
+    color: #2d3f57;
+    text-decoration: underline;
+  }
+  
+  .delete-link {
+    color: #e74c3c;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  
+  .delete-link:hover {
+    color: #c0392b;
+    text-decoration: underline;
+  }
+  
+  /* User Type Badge */
+  .user-type-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .user-type-admin {
+    background-color: #e74c3c;
+    color: white;
+  }
+  
+  .user-type-moderator {
+    background-color: #f39c12;
+    color: white;
+  }
+  
+  .user-type-user {
+    background-color: #3498db;
+    color: white;
+  }
+  
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background-color: white;
+    border-radius: 10px;
+    width: 500px;
+    max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background-color: #3a506b;
+    color: white;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+  }
+  
+  .modal-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  
+  .close-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+  }
+  
+  .modal-body {
+    padding: 20px;
+  }
+  
+  .input-field {
+    display: block;
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+  }
+  
+  .input-field:focus {
+    border-color: #3a506b;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(58, 80, 107, 0.2);
+  }
+  
+  .button-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    justify-content: flex-end;
+  }
+  
+  .submit-button {
+    background-color: #3a506b;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 14px;
+  }
+  
+  .submit-button:hover {
+    background-color: #2d3f57;
+  }
+  
+  .cancel-button {
+    background-color: #e9ecef;
+    color: #495057;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 14px;
+  }
+  
+  .cancel-button:hover {
+    background-color: #dee2e6;
+  }
+  
+  .delete-modal .modal-header {
+    background-color: #e74c3c;
+  }
+  
+  .delete-message {
+    font-size: 16px;
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+  
+  .delete-warning {
+    color: #e74c3c;
+    font-weight: 500;
+    margin-bottom: 20px;
+  }
+  
+  .delete-confirm-button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 14px;
+  }
+  
+  .delete-confirm-button:hover {
+    background-color: #c0392b;
+  }
+  
+  .delete-confirm-button:disabled,
+  .cancel-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .overflow-x-auto {
+    overflow-x: auto;
+  }
+  
+  @media (max-width: 768px) {
+    .user-container {
+      padding: 15px;
+    }
+  
+    .user-title {
+      font-size: 24px;
+    }
+  
+    .modal-content {
+      width: 95%;
+    }
+  }
+  
