@@ -44,45 +44,28 @@ const AddStudent = () => {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    
-    if (isEditing) {
-      // Updating the existing students within the form
-      const updatedStudent = {
-        id: editingId,
-        ...formData
-      };
-      
-      try {
-        await axios.put(`http://localhost:1337/updatestudent/${editingId}`, updatedStudent);
-        console.log("Student updated:", updatedStudent);
-        
-        setStudents(prevStudents => 
-          prevStudents.map(student => 
-            student.id === editingId ? updatedStudent : student
-          )
-        );
-      } catch (error) {
-        console.error("Error updating student", error);
-      }
-    } else {
-      // Adding new student
-      const newStudent = {
-        id: Date.now(),
-        ...formData
-      };
-      
-      try {
-        await axios.post("http://localhost:1337/addstudent", newStudent);
-        console.log("Student added:", newStudent);
-        setStudents(prevStudents => [...prevStudents, newStudent]);
-      } catch (error) {
-        console.error("Error Adding student", error);
-      }
+
+    if (!formData.idNumber || !formData.firstName || !formData.lastName || !formData.course || !formData.year) {
+        alert("All fields are required!");
+        return;
     }
-    
-    // closed and reset the modal
+
+    try {
+        if (isEditing) {
+            await axios.put(`http://localhost:1337/updatestudent/${editingId}`, formData);
+            setStudents(prevStudents => prevStudents.map(student => student.id === editingId ? { ...student, ...formData } : student));
+        } else {
+            const response = await axios.post("http://localhost:1337/addstudent", formData);
+            setStudents(prevStudents => [...prevStudents, response.data]);
+        }
+    } catch (error) {
+        console.error("Error Adding/Updating student:", error.response?.data || error.message);
+        alert(error.response?.data?.message || "Something went wrong.");
+    }
+
     closeModal();
-  }
+}
+
   
   function resetForm() {
     setFormData({

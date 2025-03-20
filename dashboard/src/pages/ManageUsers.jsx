@@ -42,25 +42,28 @@ const ManageUsers = () => {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (isEditing) {
-      const updatedUser = { id: editingId, ...formData };
-      try {
-        await axios.put(`http://localhost:1337/updateuser/${editingId}`, updatedUser);
-        setUsers(prevUsers => prevUsers.map(user => user.id === editingId ? updatedUser : user));
-      } catch (error) {
-        console.error("Error updating user", error);
-      }
-    } else {
-      const newUser = { id: Date.now(), ...formData };
-      try {
-        await axios.post("http://localhost:1337/adduser", newUser);
-        setUsers(prevUsers => [...prevUsers, newUser]);
-      } catch (error) {
-        console.error("Error Adding user", error);
-      }
+
+    if (!formData.firstName || !formData.lastName || !formData.username || !formData.password || !formData.userType) {
+        alert("All fields are required!");
+        return;
     }
+
+    try {
+        if (isEditing) {
+            await axios.put(`http://localhost:1337/updateuser/${editingId}`, formData);
+            setUsers(prevUsers => prevUsers.map(user => user.id === editingId ? { ...user, ...formData } : user));
+        } else {
+            const response = await axios.post("http://localhost:1337/adduser", formData);
+            setUsers(prevUsers => [...prevUsers, response.data]);
+        }
+    } catch (error) {
+        console.error("Error Adding/Updating user:", error.response?.data || error.message);
+        alert(error.response?.data?.message || "Something went wrong.");
+    }
+
     closeModal();
-  }
+}
+
 
   async function confirmDelete() {
     if (!userToDelete) return;
