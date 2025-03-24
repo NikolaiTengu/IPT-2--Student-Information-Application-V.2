@@ -43,11 +43,28 @@ app.get("/fetchstudents", (req, res) => {
 app.post("/adduser", (req, res) => {
     const { userID, firstName, lastName, middleName, username, password, userType } = req.body;
 
-    if (!firstName || !lastName || !username || !password || !userType) {
+    if (!userID || !firstName || !lastName || !username || !password || !userType) {
         return res.status(400).json({ message: "All fields are required" });
     }
 
-    const newUser = { id: Date.now(), userID, firstName, lastName, middleName, username, password, userType };
+    // Check if userID already exists
+    const existingUser = users.find(user => user.userID === userID);
+    if (existingUser) {
+        return res.status(400).json({ message: "User ID already exists" });
+    }
+
+    // Use the provided userID as the unique identifier
+    const newUser = { 
+        id: Date.now(), // Internal ID for database operations
+        userID,        // User-provided ID that matches with student ID
+        firstName, 
+        lastName, 
+        middleName, 
+        username, 
+        password, 
+        userType 
+    };
+    
     users.push(newUser);
     saveData(USERS_FILE, users);
 
@@ -57,12 +74,23 @@ app.post("/adduser", (req, res) => {
 // Update a user
 app.put('/updateuser/:id', (req, res) => {
     const id = parseInt(req.params.id);
-    const { firstName, lastName, middleName, username, password, userType } = req.body;
+    const { userID, firstName, lastName, middleName, username, password, userType } = req.body;
     const userIndex = users.findIndex(user => user.id === id);
 
     if (userIndex === -1) return res.status(404).json({ message: 'User not found' });
 
-    users[userIndex] = { id, firstName, lastName, middleName, username, password, userType };
+    // Keep the same id but update other fields including userID
+    users[userIndex] = { 
+        id: users[userIndex].id, 
+        userID: userID || users[userIndex].userID,
+        firstName: firstName || users[userIndex].firstName, 
+        lastName: lastName || users[userIndex].lastName, 
+        middleName: middleName || users[userIndex].middleName, 
+        username: username || users[userIndex].username, 
+        password: password || users[userIndex].password, 
+        userType: userType || users[userIndex].userType 
+    };
+    
     saveData(USERS_FILE, users);
 
     res.status(200).json({ message: 'User updated successfully', updatedUser: users[userIndex] });
@@ -89,7 +117,22 @@ app.post("/addstudent", (req, res) => {
         return res.status(400).json({ message: "All fields are required" });
     }
 
-    const newStudent = { id: Date.now(), idNumber, firstName, lastName, middleName, course, year };
+    // Check if student ID already exists
+    const existingStudent = students.find(student => student.idNumber === idNumber);
+    if (existingStudent) {
+        return res.status(400).json({ message: "Student ID already exists" });
+    }
+
+    const newStudent = { 
+        id: Date.now(), // Internal ID for database operations
+        idNumber,      // This should match userID in the users collection when applicable
+        firstName, 
+        lastName, 
+        middleName, 
+        course, 
+        year 
+    };
+    
     students.push(newStudent);
     saveData(STUDENTS_FILE, students);
 
@@ -104,7 +147,17 @@ app.put('/updatestudent/:id', (req, res) => {
 
     if (studentIndex === -1) return res.status(404).json({ message: 'Student not found' });
 
-    students[studentIndex] = { id, idNumber, firstName, lastName, middleName, course, year };
+    // Keep the same id but update other fields including idNumber
+    students[studentIndex] = { 
+        id: students[studentIndex].id, 
+        idNumber: idNumber || students[studentIndex].idNumber,
+        firstName: firstName || students[studentIndex].firstName, 
+        lastName: lastName || students[studentIndex].lastName, 
+        middleName: middleName || students[studentIndex].middleName, 
+        course: course || students[studentIndex].course, 
+        year: year || students[studentIndex].year 
+    };
+    
     saveData(STUDENTS_FILE, students);
 
     res.status(200).json({ message: 'Student updated successfully', updatedStudent: students[studentIndex] });
@@ -121,6 +174,26 @@ app.delete('/deletestudent/:id', (req, res) => {
     saveData(STUDENTS_FILE, students);
 
     res.status(200).json({ message: 'Student deleted successfully', deletedStudent });
+});
+
+// Find user by student ID
+app.get('/finduserbystudentid/:idNumber', (req, res) => {
+    const idNumber = req.params.idNumber;
+    const user = users.find(user => user.userID === idNumber);
+    
+    if (!user) return res.status(404).json({ message: 'No user found with this student ID' });
+    
+    res.status(200).json(user);
+});
+
+// Find student by user ID
+app.get('/findstudentuserid/:userID', (req, res) => {
+    const userID = req.params.userID;
+    const student = students.find(student => student.idNumber === userID);
+    
+    if (!student) return res.status(404).json({ message: 'No student found with this user ID' });
+    
+    res.status(200).json(student);
 });
 
 app.listen(port, () => {
