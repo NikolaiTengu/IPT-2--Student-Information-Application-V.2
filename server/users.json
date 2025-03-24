@@ -18,5 +18,15 @@
     "username": "ArcheristToday",
     "password": "23@thankyousomuchforbeingnice",
     "userType": "User"
+  },
+  {
+    "id": 1742787922541,
+    "userID": "54562211",
+    "firstName": "Morgoth",
+    "lastName": "Baranthor",
+    "middleName": "Clannad",
+    "username": "MorgothModeratorAcc_main1",
+    "password": "main@2330Admincomph",
+    "userType": "Moderator"
   }
 ]
