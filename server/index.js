@@ -3,6 +3,7 @@ const cors = require('cors');
 const fs = require('fs');
 const app = express();
 const port = 1337;
+const Student = require('./models/student.model');
 
 const mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost:27017/StudentInformationSystem');
