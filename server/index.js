@@ -4,6 +4,10 @@ const fs = require('fs');
 const app = express();
 const port = 1337;
 
+const mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost:27017/StudentInformationSystem');
+
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
