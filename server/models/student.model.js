@@ -11,3 +11,5 @@ const Student = new mongoose.Schema(
     },
     { collection: 'student-data'}
 );
+
+module.exports = mongoose.model('Student', Student);
