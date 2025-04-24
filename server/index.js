@@ -4,10 +4,12 @@ const fs = require('fs');
 const app = express();
 const port = 1337;
 const Student = require('./models/student.model');
+const User = require('./models/user.model');
 
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/StudentInformationSystem');
-
+mongoose.connect('mongodb://localhost:27017/StudentInformationSystem')
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('Could not connect to MongoDB', err));
 
 app.use(cors());
 app.use(express.json());
@@ -34,171 +36,223 @@ function saveData(filename, data) {
 let users = loadData(USERS_FILE);
 let students = loadData(STUDENTS_FILE);
 
-// Fetch all users
-app.get("/fetchusers", (req, res) => {
-    res.json(users);
+app.get("/fetchusers", async (req, res) => {
+    try {
+        const users = await User.find();
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching users", error: error.message });
+    }
 });
 
 // Fetch all students
-app.get("/fetchstudents", (req, res) => {
-    res.json(students);
+app.get("/fetchstudents", async (req, res) => {
+    try {
+        const students = await Student.find();
+        res.json(students);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching students", error: error.message });
+    }
 });
 
 // Add a new user
-app.post("/adduser", (req, res) => {
+app.post("/adduser", async (req, res) => {
     const { userID, firstName, lastName, middleName, username, password, userType } = req.body;
 
     if (!userID || !firstName || !lastName || !username || !password || !userType) {
         return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Check if userID already exists
-    const existingUser = users.find(user => user.userID === userID);
-    if (existingUser) {
-        return res.status(400).json({ message: "User ID already exists" });
+    try {
+        // Check if userID already exists
+        const existingUser = await User.findOne({ userID });
+        if (existingUser) {
+            return res.status(400).json({ message: "User ID already exists" });
+        }
+
+        // Check if username is taken
+        const usernameExists = await User.findOne({ username });
+        if (usernameExists) {
+            return res.status(400).json({ message: "Username already taken" });
+        }
+
+        // Create new user document
+        const newUser = new User({
+            userID,
+            firstName,
+            lastName,
+            middleName,
+            username,
+            password, // Note: In production, you should hash passwords
+            userType
+        });
+
+        // Save to database
+        await newUser.save();
+        res.status(201).json(newUser);
+    } catch (error) {
+        res.status(500).json({ message: "Error adding user", error: error.message });
     }
-
-    // Use the provided userID as the unique identifier
-    const newUser = { 
-        id: Date.now(), // Internal ID for database operations
-        userID,        // User-provided ID that matches with student ID
-        firstName, 
-        lastName, 
-        middleName, 
-        username, 
-        password, 
-        userType 
-    };
-    
-    users.push(newUser);
-    saveData(USERS_FILE, users);
-
-    res.status(201).json(newUser);
 });
 
 // Update a user
-app.put('/updateuser/:id', (req, res) => {
-    const id = parseInt(req.params.id);
+app.put('/updateuser/:id', async (req, res) => {
+    const id = req.params.id;
     const { userID, firstName, lastName, middleName, username, password, userType } = req.body;
-    const userIndex = users.findIndex(user => user.id === id);
 
-    if (userIndex === -1) return res.status(404).json({ message: 'User not found' });
+    try {
+        const updatedUser = await User.findByIdAndUpdate(
+            id,
+            {
+                userID,
+                firstName,
+                lastName,
+                middleName,
+                username,
+                password,
+                userType
+            },
+            { new: true, runValidators: true }
+        );
 
-    // Keep the same id but update other fields including userID
-    users[userIndex] = { 
-        id: users[userIndex].id, 
-        userID: userID || users[userIndex].userID,
-        firstName: firstName || users[userIndex].firstName, 
-        lastName: lastName || users[userIndex].lastName, 
-        middleName: middleName || users[userIndex].middleName, 
-        username: username || users[userIndex].username, 
-        password: password || users[userIndex].password, 
-        userType: userType || users[userIndex].userType 
-    };
-    
-    saveData(USERS_FILE, users);
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
 
-    res.status(200).json({ message: 'User updated successfully', updatedUser: users[userIndex] });
+        res.status(200).json({ message: 'User updated successfully', updatedUser });
+    } catch (error) {
+        res.status(500).json({ message: "Error updating user", error: error.message });
+    }
 });
 
 // Delete a user
-app.delete('/deleteuser/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    const userIndex = users.findIndex(user => user.id === id);
+app.delete('/deleteuser/:id', async (req, res) => {
+    const id = req.params.id;
 
-    if (userIndex === -1) return res.status(404).json({ message: 'User not found' });
+    try {
+        const deletedUser = await User.findByIdAndDelete(id);
+        
+        if (!deletedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
 
-    const deletedUser = users.splice(userIndex, 1)[0];
-    saveData(USERS_FILE, users);
-
-    res.status(200).json({ message: 'User deleted successfully', deletedUser });
+        res.status(200).json({ message: 'User deleted successfully', deletedUser });
+    } catch (error) {
+        res.status(500).json({ message: "Error deleting user", error: error.message });
+    }
 });
 
 // Add a new student
-app.post("/addstudent", (req, res) => {
+app.post("/addstudent", async (req, res) => {
     const { idNumber, firstName, lastName, middleName, course, year } = req.body;
 
     if (!idNumber || !firstName || !lastName || !course || !year) {
         return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Check if student ID already exists
-    const existingStudent = students.find(student => student.idNumber === idNumber);
-    if (existingStudent) {
-        return res.status(400).json({ message: "Student ID already exists" });
+    try {
+        // Check if student ID already exists
+        const existingStudent = await Student.findOne({ idNumber });
+        if (existingStudent) {
+            return res.status(400).json({ message: "Student ID already exists" });
+        }
+
+        // Create new student document
+        const newStudent = new Student({
+            idNumber,
+            firstName,
+            lastName,
+            middleName,
+            course,
+            year
+        });
+
+        // Save to database
+        await newStudent.save();
+        res.status(201).json(newStudent);
+    } catch (error) {
+        res.status(500).json({ message: "Error adding student", error: error.message });
     }
-
-    const newStudent = { 
-        id: Date.now(), // Internal ID for database operations
-        idNumber,      // This should match userID in the users collection when applicable
-        firstName, 
-        lastName, 
-        middleName, 
-        course, 
-        year 
-    };
-    
-    students.push(newStudent);
-    saveData(STUDENTS_FILE, students);
-
-    res.status(201).json(newStudent);
 });
 
 // Update a student
-app.put('/updatestudent/:id', (req, res) => {
-    const id = parseInt(req.params.id);
+app.put('/updatestudent/:id', async (req, res) => {
+    const id = req.params.id;
     const { idNumber, firstName, lastName, middleName, course, year } = req.body;
-    const studentIndex = students.findIndex(student => student.id === id);
 
-    if (studentIndex === -1) return res.status(404).json({ message: 'Student not found' });
+    try {
+        const updatedStudent = await Student.findByIdAndUpdate(
+            id,
+            {
+                idNumber,
+                firstName,
+                lastName,
+                middleName,
+                course,
+                year
+            },
+            { new: true, runValidators: true }
+        );
 
-    // Keep the same id but update other fields including idNumber
-    students[studentIndex] = { 
-        id: students[studentIndex].id, 
-        idNumber: idNumber || students[studentIndex].idNumber,
-        firstName: firstName || students[studentIndex].firstName, 
-        lastName: lastName || students[studentIndex].lastName, 
-        middleName: middleName || students[studentIndex].middleName, 
-        course: course || students[studentIndex].course, 
-        year: year || students[studentIndex].year 
-    };
-    
-    saveData(STUDENTS_FILE, students);
+        if (!updatedStudent) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
 
-    res.status(200).json({ message: 'Student updated successfully', updatedStudent: students[studentIndex] });
+        res.status(200).json({ message: 'Student updated successfully', updatedStudent });
+    } catch (error) {
+        res.status(500).json({ message: "Error updating student", error: error.message });
+    }
 });
 
 // Delete a student
-app.delete('/deletestudent/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    const studentIndex = students.findIndex(student => student.id === id);
+app.delete('/deletestudent/:id', async (req, res) => {
+    const id = req.params.id;
 
-    if (studentIndex === -1) return res.status(404).json({ message: 'Student not found' });
+    try {
+        const deletedStudent = await Student.findByIdAndDelete(id);
+        
+        if (!deletedStudent) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
 
-    const deletedStudent = students.splice(studentIndex, 1)[0];
-    saveData(STUDENTS_FILE, students);
-
-    res.status(200).json({ message: 'Student deleted successfully', deletedStudent });
+        res.status(200).json({ message: 'Student deleted successfully', deletedStudent });
+    } catch (error) {
+        res.status(500).json({ message: "Error deleting student", error: error.message });
+    }
 });
 
 // Find user by student ID
-app.get('/finduserbystudentid/:idNumber', (req, res) => {
+app.get('/finduserbystudentid/:idNumber', async (req, res) => {
     const idNumber = req.params.idNumber;
-    const user = users.find(user => user.userID === idNumber);
     
-    if (!user) return res.status(404).json({ message: 'No user found with this student ID' });
-    
-    res.status(200).json(user);
+    try {
+        const user = await User.findOne({ userID: idNumber });
+        
+        if (!user) {
+            return res.status(404).json({ message: 'No user found with this student ID' });
+        }
+        
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: "Error finding user", error: error.message });
+    }
 });
 
 // Find student by user ID
-app.get('/findstudentuserid/:userID', (req, res) => {
+app.get('/findstudentuserid/:userID', async (req, res) => {
     const userID = req.params.userID;
-    const student = students.find(student => student.idNumber === userID);
     
-    if (!student) return res.status(404).json({ message: 'No student found with this user ID' });
-    
-    res.status(200).json(student);
+    try {
+        const student = await Student.findOne({ idNumber: userID });
+        
+        if (!student) {
+            return res.status(404).json({ message: 'No student found with this user ID' });
+        }
+        
+        res.status(200).json(student);
+    } catch (error) {
+        res.status(500).json({ message: "Error finding student", error: error.message });
+    }
 });
 
 app.listen(port, () => {

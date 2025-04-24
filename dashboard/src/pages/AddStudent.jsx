@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import '../styles/AddStudent.css';
 import axios from "axios";
 
-
 const AddStudent = () => {
   const [students, setStudents] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -52,8 +51,14 @@ const AddStudent = () => {
 
     try {
         if (isEditing) {
-            await axios.put(`http://localhost:1337/updatestudent/${editingId}`, formData);
-            setStudents(prevStudents => prevStudents.map(student => student.id === editingId ? { ...student, ...formData } : student));
+            const response = await axios.put(`http://localhost:1337/updatestudent/${editingId}`, formData);
+            
+            // Update the students state with the updated data
+            setStudents(prevStudents => 
+                prevStudents.map(student => 
+                    student._id === editingId ? response.data.updatedStudent : student
+                )
+            );
         } else {
             const response = await axios.post("http://localhost:1337/addstudent", formData);
             setStudents(prevStudents => [...prevStudents, response.data]);
@@ -64,9 +69,8 @@ const AddStudent = () => {
     }
 
     closeModal();
-}
+  }
 
-  
   function resetForm() {
     setFormData({
       idNumber: '',
@@ -80,9 +84,9 @@ const AddStudent = () => {
   
   function handleEdit(student) {
     setIsEditing(true);
-    setEditingId(student.id);
+    setEditingId(student._id); // Use MongoDB's _id
     
-    // this will populate the form with the student data
+    // Populate the form with the student data
     setFormData({
       idNumber: student.idNumber,
       firstName: student.firstName,
@@ -106,16 +110,15 @@ const AddStudent = () => {
     try {
       setIsDeleting(true);
       
-      console.log("Attempting to delete student with ID:", studentToDelete.id);
-      await axios.delete(`http://localhost:1337/deletestudent/${studentToDelete.id}`);
+      console.log("Attempting to delete student with ID:", studentToDelete._id);
+      await axios.delete(`http://localhost:1337/deletestudent/${studentToDelete._id}`);
       console.log("Student deleted:", studentToDelete);
       
-      // update the students list
+      // Update the students list
       setStudents(prevStudents => 
-        prevStudents.filter(student => student.id !== studentToDelete.id)
+        prevStudents.filter(student => student._id !== studentToDelete._id)
       );
       
-      // same as closeDeleteModal()
       closeDeleteModal();
     } catch (error) {
       console.error("Error deleting student", error.response?.data || error.message);
@@ -168,7 +171,7 @@ const AddStudent = () => {
             </thead>
             <tbody>
               {students.map((student) => (
-                <tr key={student.id}>
+                <tr key={student._id}>
                   <td>{student.idNumber}</td>
                   <td>{student.firstName}</td>
                   <td>{student.lastName}</td>
@@ -211,7 +214,7 @@ const AddStudent = () => {
         </div>
       </div>
       
-      {/* --> Add/Edit Modal <-- */}
+      {/* Add/Edit Modal */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -289,7 +292,7 @@ const AddStudent = () => {
         </div>
       )}
       
-      {/* ----> Delete Confirmation Modal <---- */}
+      {/* Delete Confirmation Modal */}
       {showDeleteModal && studentToDelete && (
         <div className="modal-overlay">
           <div className="modal-content delete-modal">
