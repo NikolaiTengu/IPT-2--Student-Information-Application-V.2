@@ -1,15 +1,12 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const Student = new mongoose.Schema(
-    {
-        id: { type: String, required: true },
-        firstName: { type: String, required: true },
-        lastName: { type: String, required: true },
-        middleName: { type: String},
-        course: { type: String, required: true },
-        year: { type: String, required: true },
-    },
-    { collection: 'student-data'}
-);
+const studentSchema = new mongoose.Schema({
+    idNumber: { type: String, required: true, unique: true },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    middleName: { type: String },
+    course: { type: String, required: true },
+    year: { type: Number, required: true }
+});
 
-module.exports = mongoose.model('Student', Student);
+module.exports = mongoose.model("Student", studentSchema);

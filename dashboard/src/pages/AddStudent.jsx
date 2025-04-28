@@ -18,6 +18,7 @@ const AddStudent = () => {
   const [editingId, setEditingId] = useState(null);
   const [studentToDelete, setStudentToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchStudents();
@@ -44,31 +45,43 @@ const AddStudent = () => {
   async function handleSubmit(e) {
     e.preventDefault();
 
+    // Validate required fields
     if (!formData.idNumber || !formData.firstName || !formData.lastName || !formData.course || !formData.year) {
-        alert("All fields are required!");
-        return;
+      alert("All fields are required!");
+      return;
     }
+
+    setIsSubmitting(true);
 
     try {
-        if (isEditing) {
-            const response = await axios.put(`http://localhost:1337/updatestudent/${editingId}`, formData);
-            
-            // Update the students state with the updated data
-            setStudents(prevStudents => 
-                prevStudents.map(student => 
-                    student._id === editingId ? response.data.updatedStudent : student
-                )
-            );
-        } else {
-            const response = await axios.post("http://localhost:1337/addstudent", formData);
-            setStudents(prevStudents => [...prevStudents, response.data]);
-        }
-    } catch (error) {
-        console.error("Error Adding/Updating student:", error.response?.data || error.message);
-        alert(error.response?.data?.message || "Something went wrong.");
-    }
+      if (isEditing) {
+        // Update existing student
+        const response = await axios.put(`http://localhost:1337/updatestudent/${editingId}`, formData);
 
-    closeModal();
+        // Update the students state with the updated data
+        setStudents(prevStudents =>
+          prevStudents.map(student =>
+            student._id === editingId ? response.data.updatedStudent : student
+          )
+        );
+
+        alert("Student updated successfully!");
+      } else {
+        // Add a new student
+        const response = await axios.post("http://localhost:1337/addstudent", formData);
+
+        // Add the new student to the state
+        setStudents(prevStudents => [...prevStudents, response.data]);
+
+        alert("Student added successfully!");
+      }
+    } catch (error) {
+      console.error("Error Adding/Updating student:", error.response?.data || error.message);
+      alert(error.response?.data?.message || "Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+      closeModal();
+    }
   }
 
   function resetForm() {
@@ -81,11 +94,11 @@ const AddStudent = () => {
       year: ''
     });
   }
-  
+
   function handleEdit(student) {
     setIsEditing(true);
     setEditingId(student._id); // Use MongoDB's _id
-    
+
     // Populate the form with the student data
     setFormData({
       idNumber: student.idNumber,
@@ -95,30 +108,30 @@ const AddStudent = () => {
       course: student.course,
       year: student.year
     });
-    
+
     setShowModal(true);
   }
-  
+
   function handleDeleteClick(student) {
     setStudentToDelete(student);
     setShowDeleteModal(true);
   }
-  
+
   async function confirmDelete() {
     if (!studentToDelete) return;
-    
+
     try {
       setIsDeleting(true);
-      
+
       console.log("Attempting to delete student with ID:", studentToDelete._id);
       await axios.delete(`http://localhost:1337/deletestudent/${studentToDelete._id}`);
       console.log("Student deleted:", studentToDelete);
-      
+
       // Update the students list
-      setStudents(prevStudents => 
+      setStudents(prevStudents =>
         prevStudents.filter(student => student._id !== studentToDelete._id)
       );
-      
+
       closeDeleteModal();
     } catch (error) {
       console.error("Error deleting student", error.response?.data || error.message);
@@ -127,19 +140,19 @@ const AddStudent = () => {
       setIsDeleting(false);
     }
   }
-  
+
   function openAddModal() {
     setIsEditing(false);
     resetForm();
     setShowModal(true);
   }
-  
+
   function closeModal() {
     setShowModal(false);
     setIsEditing(false);
     resetForm();
   }
-  
+
   function closeDeleteModal() {
     setShowDeleteModal(false);
     setStudentToDelete(null);
@@ -148,14 +161,14 @@ const AddStudent = () => {
   return (
     <div className="student-container">
       <h1 className="student-title">MANAGE STUDENTS!</h1>
-      
+
       <div className="table-container">
         <div className="table-header">
           <button className="add-button" onClick={openAddModal}>
             ADD STUDENT
           </button>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="student-table">
             <thead>
@@ -179,8 +192,8 @@ const AddStudent = () => {
                   <td>{student.course}</td>
                   <td>{student.year}</td>
                   <td className="action-buttons">
-                    <a 
-                      href="#" 
+                    <a
+                      href="#"
                       className="edit-link"
                       onClick={(e) => {
                         e.preventDefault();
@@ -189,8 +202,8 @@ const AddStudent = () => {
                     >
                       Edit
                     </a>
-                    <a 
-                      href="#" 
+                    <a
+                      href="#"
                       className="delete-link"
                       onClick={(e) => {
                         e.preventDefault();
@@ -213,7 +226,7 @@ const AddStudent = () => {
           </table>
         </div>
       </div>
-      
+
       {/* Add/Edit Modal */}
       {showModal && (
         <div className="modal-overlay">
@@ -224,65 +237,65 @@ const AddStudent = () => {
             </div>
             <div className="modal-body">
               <form onSubmit={handleSubmit}>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   name="idNumber"
                   value={formData.idNumber}
                   onChange={handleInputChange}
-                  placeholder="ID Number" 
-                  className="input-field" 
-                  required 
+                  placeholder="ID Number"
+                  className="input-field"
+                  required
                 />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleInputChange}
-                  placeholder="First Name" 
-                  className="input-field" 
-                  required 
+                  placeholder="First Name"
+                  className="input-field"
+                  required
                 />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleInputChange}
-                  placeholder="Last Name" 
-                  className="input-field" 
-                  required 
+                  placeholder="Last Name"
+                  className="input-field"
+                  required
                 />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   name="middleName"
                   value={formData.middleName}
                   onChange={handleInputChange}
-                  placeholder="Middle Name" 
-                  className="input-field" 
+                  placeholder="Middle Name"
+                  className="input-field"
                 />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   name="course"
                   value={formData.course}
                   onChange={handleInputChange}
-                  placeholder="Course" 
-                  className="input-field" 
-                  required 
+                  placeholder="Course"
+                  className="input-field"
+                  required
                 />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   name="year"
                   value={formData.year}
                   onChange={handleInputChange}
-                  placeholder="Year" 
-                  className="input-field" 
-                  required 
+                  placeholder="Year"
+                  className="input-field"
+                  required
                 />
-                
+
                 <div className="button-group">
-                  <button type="submit" className="submit-button">
-                    {isEditing ? 'UPDATE STUDENT' : 'ADD STUDENT'}
+                  <button type="submit" className="submit-button" disabled={isSubmitting}>
+                    {isSubmitting ? 'PROCESSING...' : isEditing ? 'UPDATE STUDENT' : 'ADD STUDENT'}
                   </button>
-                  <button type="button" className="cancel-button" onClick={closeModal}>
+                  <button type="button" className="cancel-button" onClick={closeModal} disabled={isSubmitting}>
                     CANCEL
                   </button>
                 </div>
@@ -291,7 +304,7 @@ const AddStudent = () => {
           </div>
         </div>
       )}
-      
+
       {/* Delete Confirmation Modal */}
       {showDeleteModal && studentToDelete && (
         <div className="modal-overlay">
@@ -305,19 +318,19 @@ const AddStudent = () => {
                 Are you sure you want to delete student <strong>{studentToDelete.firstName} {studentToDelete.lastName}</strong> with ID <strong>{studentToDelete.idNumber}</strong>?
               </p>
               <p className="delete-warning">This action cannot be undone.</p>
-              
+
               <div className="button-group">
-                <button 
-                  type="button" 
-                  className="delete-confirm-button" 
+                <button
+                  type="button"
+                  className="delete-confirm-button"
                   onClick={confirmDelete}
                   disabled={isDeleting}
                 >
                   {isDeleting ? 'DELETING...' : 'DELETE'}
                 </button>
-                <button 
-                  type="button" 
-                  className="cancel-button" 
+                <button
+                  type="button"
+                  className="cancel-button"
                   onClick={closeDeleteModal}
                   disabled={isDeleting}
                 >

@@ -6,8 +6,8 @@ const port = 1337;
 const Student = require('./models/student.model');
 const User = require('./models/user.model');
 
-const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/StudentInformationSystem')
+const mongoose = require("mongoose");
+mongoose.connect("mongodb://localhost:27017/StudentInformationSystem")
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Could not connect to MongoDB', err));
 
@@ -146,18 +146,19 @@ app.delete('/deleteuser/:id', async (req, res) => {
 app.post("/addstudent", async (req, res) => {
     const { idNumber, firstName, lastName, middleName, course, year } = req.body;
 
+    // Validate required fields
     if (!idNumber || !firstName || !lastName || !course || !year) {
         return res.status(400).json({ message: "All fields are required" });
     }
 
     try {
-        // Check if student ID already exists
+        // Check if student ID already exists in the database
         const existingStudent = await Student.findOne({ idNumber });
         if (existingStudent) {
             return res.status(400).json({ message: "Student ID already exists" });
         }
 
-        // Create new student document
+        // Create a new student document
         const newStudent = new Student({
             idNumber,
             firstName,
@@ -167,10 +168,13 @@ app.post("/addstudent", async (req, res) => {
             year
         });
 
-        // Save to database
+        // Save the student to MongoDB
         await newStudent.save();
-        res.status(201).json(newStudent);
+
+        // Respond with the newly created student
+        res.status(201).json({ message: "Student added successfully", student: newStudent });
     } catch (error) {
+        // Handle any errors during the process
         res.status(500).json({ message: "Error adding student", error: error.message });
     }
 });
